@@ -9,10 +9,10 @@ CREATE TABLE `users` (
 
 CREATE TABLE `products` (
     `id` varchar(36) PRIMARY KEY,
-    `name` varchar(255),
-    `image` varchar(255),
+    `name` varchar(255) NOT NULL ,
+    `image` varchar(255) NOT NULL ,
     `description` varchar(255),
-    `price` float,
+    `price` float NOT NULL ,
     `created_at` timestamp
 );
 
