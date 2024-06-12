@@ -12,7 +12,7 @@ func (app *application) routes() http.Handler {
 	routes.HandleFunc("GET /", func(writer http.ResponseWriter, request *http.Request) {
 		response := payload.BaseResponse{
 			ResultCode:    SuccessCode,
-			ResultMessage: "Hello world from tech-store",
+			ResultMessage: "Hello world from tech-store 2",
 			Data:          nil,
 		}
 
