@@ -35,3 +35,65 @@ func (q *Queries) GetProductById(ctx context.Context, id string) (GetProductById
 	)
 	return i, err
 }
+
+const getProductTotalCount = `-- name: GetProductTotalCount :one
+SELECT COUNT(*) AS "totalProducts"
+FROM products
+`
+
+func (q *Queries) GetProductTotalCount(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getProductTotalCount)
+	var totalproducts int64
+	err := row.Scan(&totalproducts)
+	return totalproducts, err
+}
+
+const getProductsPaginated = `-- name: GetProductsPaginated :many
+SELECT id, name, image, description, price
+FROM products
+ORDER BY created_at desc
+LIMIT ?
+OFFSET ?
+`
+
+type GetProductsPaginatedParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+type GetProductsPaginatedRow struct {
+	ID          string  `json:"id"`
+	Name        string  `json:"name"`
+	Image       string  `json:"image"`
+	Description string  `json:"description"`
+	Price       float64 `json:"price"`
+}
+
+func (q *Queries) GetProductsPaginated(ctx context.Context, arg GetProductsPaginatedParams) ([]GetProductsPaginatedRow, error) {
+	rows, err := q.db.QueryContext(ctx, getProductsPaginated, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetProductsPaginatedRow
+	for rows.Next() {
+		var i GetProductsPaginatedRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Image,
+			&i.Description,
+			&i.Price,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
