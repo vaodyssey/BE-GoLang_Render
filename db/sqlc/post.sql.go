@@ -9,36 +9,29 @@ import (
 	"context"
 )
 
-const tempGetAllPost = `-- name: TempGetAllPost :many
-SELECT id, name, image, description, price, created_at FROM products
+const getProductById = `-- name: GetProductById :one
+SELECT id, name, image, description, price
+FROM products
+WHERE STRCMP(id, ?) = 0
 `
 
-func (q *Queries) TempGetAllPost(ctx context.Context) ([]Product, error) {
-	rows, err := q.db.QueryContext(ctx, tempGetAllPost)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Product
-	for rows.Next() {
-		var i Product
-		if err := rows.Scan(
-			&i.ID,
-			&i.Name,
-			&i.Image,
-			&i.Description,
-			&i.Price,
-			&i.CreatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+type GetProductByIdRow struct {
+	ID          string  `json:"id"`
+	Name        string  `json:"name"`
+	Image       string  `json:"image"`
+	Description string  `json:"description"`
+	Price       float64 `json:"price"`
+}
+
+func (q *Queries) GetProductById(ctx context.Context, id string) (GetProductByIdRow, error) {
+	row := q.db.QueryRowContext(ctx, getProductById, id)
+	var i GetProductByIdRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Image,
+		&i.Description,
+		&i.Price,
+	)
+	return i, err
 }

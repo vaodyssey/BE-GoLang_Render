@@ -45,6 +45,7 @@ func (app *application) routes() http.Handler {
 	})
 
 	// Product routes
+	routes.HandleFunc("GET /products/{productId}", app.getProductDetailHandler)
 
 	// Order routes
 

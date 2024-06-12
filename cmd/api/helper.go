@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"io"
 	"net/http"
@@ -119,6 +120,17 @@ func (app *application) readStrings(qs url.Values, key string, defaultValue stri
 	}
 
 	return s
+}
+
+func (app *application) readIDParam(r *http.Request, key string) (uuid.UUID, error) {
+	params := r.PathValue(key)
+
+	id, err := uuid.Parse(params)
+	if err != nil {
+		return uuid.Nil, fmt.Errorf(InvalidParameter, key)
+	}
+
+	return id, nil
 }
 
 func (app *application) commitDBTransaction(ctx context.Context, tx pgx.Tx) error {

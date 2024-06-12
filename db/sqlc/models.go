@@ -9,33 +9,33 @@ import (
 )
 
 type Order struct {
-	ID        string
-	Amount    sql.NullFloat64
-	Status    sql.NullInt32
-	UserID    sql.NullString
-	CreatedAt sql.NullTime
+	ID        string          `json:"id"`
+	Amount    sql.NullFloat64 `json:"amount"`
+	Status    sql.NullInt32   `json:"status"`
+	UserID    string          `json:"userId"`
+	CreatedAt sql.NullTime    `json:"createdAt"`
 }
 
 type OrderDetail struct {
-	OrderID   sql.NullString
-	ProductID sql.NullString
-	Quantity  sql.NullInt32
+	OrderID   string        `json:"orderId"`
+	ProductID string        `json:"productId"`
+	Quantity  sql.NullInt32 `json:"quantity"`
 }
 
 type Product struct {
-	ID          string
-	Name        sql.NullString
-	Image       sql.NullString
-	Description sql.NullString
-	Price       sql.NullFloat64
-	CreatedAt   sql.NullTime
+	ID          string       `json:"id"`
+	Name        string       `json:"name"`
+	Image       string       `json:"image"`
+	Description string       `json:"description"`
+	Price       float64      `json:"price"`
+	CreatedAt   sql.NullTime `json:"createdAt"`
 }
 
 type User struct {
-	ID       string
-	Username sql.NullString
-	Password sql.NullString
-	Email    sql.NullString
-	Phone    sql.NullString
-	Address  sql.NullString
+	ID       string `json:"id"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Email    string `json:"email"`
+	Phone    string `json:"phone"`
+	Address  string `json:"address"`
 }
