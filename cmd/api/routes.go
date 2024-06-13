@@ -51,6 +51,11 @@ func (app *application) routes() http.Handler {
 	// Order routes
 
 	// User routes
+	routes.HandleFunc("POST /register", app.registerUserHandler)
+	routes.HandleFunc("POST /login", app.loginUserHandler)
+	routes.HandleFunc("GET /logout/{userId}", app.logoutUserHandler)
+	routes.HandleFunc("GET /users/{userId}", app.getUserDetailsHandler)
+	routes.HandleFunc("PUT /users/{userId}", app.updateUserDetailsHandler)
 
 	// Return routes
 	return app.recoverPanic(routes)
