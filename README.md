@@ -1,5 +1,11 @@
 # Notes
 
+## How to run
+### Use `docker compose up -d` command
+### Test user:
+#### username: test
+#### password: abc123
+
 ## Sqlc
 ### 1. All of sql files are stored under */db/queries*
 ### 2. After writing sql use `sqlc generate` cli to compile sql to go

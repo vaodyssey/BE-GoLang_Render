@@ -11,6 +11,8 @@ RUN go mod download && go mod verify
 COPY ./cmd ./cmd
 COPY ./db ./db
 COPY ./internal ./internal
+COPY ./cache ./cache
+COPY ./utils ./utils
 
 COPY ./.env ./.env
 ENV GO111MODULE=on

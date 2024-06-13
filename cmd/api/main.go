@@ -34,8 +34,7 @@ type application struct {
 const (
 	Env     = ".env"
 	AppPort = "APP_PORT"
-
-	DbDsn = "DB_DSN"
+	DbDsn   = "DB_DSN"
 )
 
 func main() {
@@ -60,7 +59,6 @@ func main() {
 	cfg.db.maxOpenConns = 20
 	cfg.db.maxIdleConns = 20
 
-	logr.PrintInfo("dbDsn: ", cfg.db.dsn)
 	// Initialize sqlcDb
 	dbConn, err := sql.Open("mysql", cfg.db.dsn)
 	if err != nil {
