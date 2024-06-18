@@ -20,8 +20,8 @@ func (app *application) getProductsPaginatedHandler(w http.ResponseWriter, r *ht
 
 	params := db.GetProductsPaginatedParams{
 		SearchTerm: searchTerm,
-		MinPrice:   float64(minPrice),
-		MaxPrice:   float64(maxPrice),
+		MinPrice:   float64(maxPrice),
+		MaxPrice:   float64(minPrice),
 		SortBy:     sortBy,
 		SortOrder:  sortOrder,
 		Limit:      int32(pageSize),

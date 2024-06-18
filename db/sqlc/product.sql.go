@@ -51,7 +51,11 @@ func (q *Queries) GetProductTotalCount(ctx context.Context) (int64, error) {
 const getProductsPaginated = `-- name: GetProductsPaginated :many
 SELECT id, name, image, description, price
 FROM products
-WHERE (name LIKE CONCAT('%',?, '%')) and (price between ? and ?)
+WHERE
+    (? = '' OR name LIKE CONCAT('%', ?, '%'))
+  AND (
+    (? = 0 AND ? = 0)
+        OR (price BETWEEN ? AND ?))
 ORDER BY
     CASE WHEN ? = 'price' AND ? = 'ASC' THEN price END ,
     CASE WHEN ? = 'price' AND ? = 'DESC' THEN price END DESC ,
@@ -82,6 +86,9 @@ type GetProductsPaginatedRow struct {
 func (q *Queries) GetProductsPaginated(ctx context.Context, arg GetProductsPaginatedParams) ([]GetProductsPaginatedRow, error) {
 	rows, err := q.db.QueryContext(ctx, getProductsPaginated,
 		arg.SearchTerm,
+		arg.SearchTerm,
+		arg.MinPrice,
+		arg.MaxPrice,
 		arg.MinPrice,
 		arg.MaxPrice,
 		arg.SortBy,
