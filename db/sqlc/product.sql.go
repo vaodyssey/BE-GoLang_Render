@@ -51,10 +51,10 @@ func (q *Queries) GetProductTotalCount(ctx context.Context) (int64, error) {
 const getProductsPaginated = `-- name: GetProductsPaginated :many
 SELECT id, name, image, description, price
 FROM products
-WHERE name LIKE CONCAT('%', CAST(? AS char), '%')
+WHERE (name LIKE CONCAT('%',?, '%')) and (price between ? and ?)
 ORDER BY
-    CASE WHEN ? = 'price' AND ? = 'ASC' THEN price END,
-    CASE WHEN ?= 'price' AND ? = 'DESC' THEN price END DESC,
+    CASE WHEN ? = 'price' AND ? = 'ASC' THEN price END ,
+    CASE WHEN ? = 'price' AND ? = 'DESC' THEN price END DESC ,
     CASE WHEN ? = 'name' AND ? = 'ASC' THEN name END,
     CASE WHEN ? = 'name' AND ? = 'DESC' THEN name END DESC
 LIMIT ?
@@ -63,6 +63,8 @@ OFFSET ?
 
 type GetProductsPaginatedParams struct {
 	SearchTerm interface{} `json:"searchTerm"`
+	MinPrice   float64     `json:"minPrice"`
+	MaxPrice   float64     `json:"maxPrice"`
 	SortBy     interface{} `json:"sortBy"`
 	SortOrder  interface{} `json:"sortOrder"`
 	Limit      int32       `json:"limit"`
@@ -80,6 +82,8 @@ type GetProductsPaginatedRow struct {
 func (q *Queries) GetProductsPaginated(ctx context.Context, arg GetProductsPaginatedParams) ([]GetProductsPaginatedRow, error) {
 	rows, err := q.db.QueryContext(ctx, getProductsPaginated,
 		arg.SearchTerm,
+		arg.MinPrice,
+		arg.MaxPrice,
 		arg.SortBy,
 		arg.SortOrder,
 		arg.SortBy,
