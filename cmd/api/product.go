@@ -10,21 +10,28 @@ import (
 )
 
 func (app *application) getProductsPaginatedHandler(w http.ResponseWriter, r *http.Request) {
-	pageNumber, err := strconv.Atoi(app.readStrings(r.URL.Query(), "page", "1"))
+	pageNumber, err := strconv.Atoi(app.readStrings(r.URL.Query(), "pageNumber", "1"))
 	if err != nil {
 		app.badRequestErrorResponse(w, err.Error())
 		return
 	}
 
-	pageSize, err := strconv.Atoi(app.readStrings(r.URL.Query(), "size", "10"))
+	pageSize, err := strconv.Atoi(app.readStrings(r.URL.Query(), "pageSize", "10"))
 	if err != nil {
 		app.badRequestErrorResponse(w, err.Error())
 		return
 	}
+
+	searchTerm := app.readStrings(r.URL.Query(), "searchTerm", "")
+	sortBy := app.readStrings(r.URL.Query(), "sortBy", "price")
+	sortOrder := app.readStrings(r.URL.Query(), "sortOrder", "DESC")
 
 	params := db.GetProductsPaginatedParams{
-		Limit:  int32(pageSize),
-		Offset: int32(pageSize * (pageNumber - 1)),
+		SearchTerm: searchTerm,
+		SortBy:     sortBy,
+		SortOrder:  sortOrder,
+		Limit:      int32(pageSize),
+		Offset:     int32(pageSize * (pageNumber - 1)),
 	}
 
 	products, err := app.queries.GetProductsPaginated(r.Context(), params)
