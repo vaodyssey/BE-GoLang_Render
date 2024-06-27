@@ -13,19 +13,25 @@ CREATE TABLE `products` (
     `image` varchar(255) NOT NULL ,
     `description` varchar(255),
     `price` float NOT NULL ,
+    `label_name` varchar(255) NOT NULL,
     `created_at` timestamp
 );
 
 CREATE TABLE `order_details` (
-    `order_id` varchar(36),
-    `product_id` varchar(36),
-    `quantity` integer
+    `order_id` varchar(36) NOT NULL ,
+    `product_id` varchar(36) NOT NULL ,
+    `quantity` integer NOT NULL
 );
 
 CREATE TABLE `orders` (
     `id` varchar(36) PRIMARY KEY,
-    `amount` float,
-    `status` int,
-    `user_id` varchar(36),
-    `created_at` timestamp
+    `amount` float NOT NULL,
+    `status` int NOT NULL,
+    `user_id` varchar(36) NOT NULL,
+    `created_at` timestamp NOT NULL
+);
+
+CREATE TABLE `labels` (
+   `name` varchar(255) PRIMARY KEY ,
+   `image` varchar(255) NOT NULL
 );
