@@ -7,7 +7,31 @@ package db
 
 import (
 	"context"
+	"strings"
 )
+
+const countProductByIds = `-- name: CountProductByIds :one
+SELECT COUNT(*) AS "totalProducts"
+FROM products
+WHERE id IN(/*SLICE:ids*/?)
+`
+
+func (q *Queries) CountProductByIds(ctx context.Context, ids []string) (int64, error) {
+	query := countProductByIds
+	var queryParams []interface{}
+	if len(ids) > 0 {
+		for _, v := range ids {
+			queryParams = append(queryParams, v)
+		}
+		query = strings.Replace(query, "/*SLICE:ids*/?", strings.Repeat(",?", len(ids))[1:], 1)
+	} else {
+		query = strings.Replace(query, "/*SLICE:ids*/?", "NULL", 1)
+	}
+	row := q.db.QueryRowContext(ctx, query, queryParams...)
+	var totalproducts int64
+	err := row.Scan(&totalproducts)
+	return totalproducts, err
+}
 
 const getProductById = `-- name: GetProductById :one
 SELECT id, name, image, description, price
@@ -49,13 +73,14 @@ func (q *Queries) GetProductTotalCount(ctx context.Context) (int64, error) {
 }
 
 const getProductsPaginated = `-- name: GetProductsPaginated :many
-SELECT id, name, image, description, price
+SELECT id, name, image, description, price, label_name
 FROM products
 WHERE
     (? = '' OR name LIKE CONCAT('%', ?, '%'))
   AND (
-    (? = 0 AND ? = 0)
-        OR (price BETWEEN ? AND ?))
+    (? = 0 AND ? = 0) OR (price >= ? AND price <= ?))
+  AND
+    (? = '' OR STRCMP(?,label_name) = 0)
 ORDER BY
     CASE WHEN ? = 'price' AND ? = 'ASC' THEN price END ,
     CASE WHEN ? = 'price' AND ? = 'DESC' THEN price END DESC ,
@@ -69,6 +94,7 @@ type GetProductsPaginatedParams struct {
 	SearchTerm interface{} `json:"searchTerm"`
 	MinPrice   float64     `json:"minPrice"`
 	MaxPrice   float64     `json:"maxPrice"`
+	Label      string      `json:"label"`
 	SortBy     interface{} `json:"sortBy"`
 	SortOrder  interface{} `json:"sortOrder"`
 	Limit      int32       `json:"limit"`
@@ -81,6 +107,7 @@ type GetProductsPaginatedRow struct {
 	Image       string  `json:"image"`
 	Description string  `json:"description"`
 	Price       float64 `json:"price"`
+	LabelName   string  `json:"labelName"`
 }
 
 func (q *Queries) GetProductsPaginated(ctx context.Context, arg GetProductsPaginatedParams) ([]GetProductsPaginatedRow, error) {
@@ -91,6 +118,8 @@ func (q *Queries) GetProductsPaginated(ctx context.Context, arg GetProductsPagin
 		arg.MaxPrice,
 		arg.MinPrice,
 		arg.MaxPrice,
+		arg.Label,
+		arg.Label,
 		arg.SortBy,
 		arg.SortOrder,
 		arg.SortBy,
@@ -115,6 +144,7 @@ func (q *Queries) GetProductsPaginated(ctx context.Context, arg GetProductsPagin
 			&i.Image,
 			&i.Description,
 			&i.Price,
+			&i.LabelName,
 		); err != nil {
 			return nil, err
 		}

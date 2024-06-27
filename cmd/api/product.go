@@ -15,13 +15,15 @@ func (app *application) getProductsPaginatedHandler(w http.ResponseWriter, r *ht
 	minPrice, _ := strconv.Atoi(app.readStrings(r.URL.Query(), "minPrice", "0"))
 	maxPrice, _ := strconv.Atoi(app.readStrings(r.URL.Query(), "maxPrice", "0"))
 	searchTerm := app.readStrings(r.URL.Query(), "searchTerm", "")
+	label := app.readStrings(r.URL.Query(), "label", "")
 	sortBy := app.readStrings(r.URL.Query(), "sortBy", "price")
 	sortOrder := app.readStrings(r.URL.Query(), "sortOrder", "DESC")
 
 	params := db.GetProductsPaginatedParams{
 		SearchTerm: searchTerm,
-		MinPrice:   float64(maxPrice),
-		MaxPrice:   float64(minPrice),
+		MinPrice:   float64(minPrice),
+		MaxPrice:   float64(maxPrice),
+		Label:      label,
 		SortBy:     sortBy,
 		SortOrder:  sortOrder,
 		Limit:      int32(pageSize),

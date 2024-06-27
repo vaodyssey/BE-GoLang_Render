@@ -6,20 +6,26 @@ package db
 
 import (
 	"database/sql"
+	"time"
 )
 
+type Label struct {
+	Name  string `json:"name"`
+	Image string `json:"image"`
+}
+
 type Order struct {
-	ID        string          `json:"id"`
-	Amount    sql.NullFloat64 `json:"amount"`
-	Status    sql.NullInt32   `json:"status"`
-	UserID    string          `json:"userId"`
-	CreatedAt sql.NullTime    `json:"createdAt"`
+	ID        string    `json:"id"`
+	Amount    float64   `json:"amount"`
+	Status    int32     `json:"status"`
+	UserID    string    `json:"userId"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 type OrderDetail struct {
-	OrderID   string        `json:"orderId"`
-	ProductID string        `json:"productId"`
-	Quantity  sql.NullInt32 `json:"quantity"`
+	OrderID   string `json:"orderId"`
+	ProductID string `json:"productId"`
+	Quantity  int32  `json:"quantity"`
 }
 
 type Product struct {
@@ -28,6 +34,7 @@ type Product struct {
 	Image       string       `json:"image"`
 	Description string       `json:"description"`
 	Price       float64      `json:"price"`
+	LabelName   string       `json:"labelName"`
 	CreatedAt   sql.NullTime `json:"createdAt"`
 }
 
