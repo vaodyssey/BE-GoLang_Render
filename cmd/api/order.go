@@ -16,6 +16,10 @@ import (
 	"time"
 )
 
+const (
+	OrderPending = 0
+)
+
 func (app *application) createOrderHandler(w http.ResponseWriter, r *http.Request) {
 	var request payload.CreateOrderRequest
 	err := app.readJson(w, r, &request)
@@ -61,6 +65,7 @@ func (app *application) createOrderHandler(w http.ResponseWriter, r *http.Reques
 	tx, err := app.db.Begin()
 	if err != nil {
 		app.serverErrorResponse(w, fmt.Errorf("cannot begin transaction"))
+		return
 	}
 	defer func(tx *sql.Tx, ctx context.Context) {
 		_ = tx.Rollback()
@@ -70,14 +75,15 @@ func (app *application) createOrderHandler(w http.ResponseWriter, r *http.Reques
 	createOrderParam := db.CreateOrderParams{
 		ID:        uuid.NewString(),
 		Amount:    request.Data.Amount,
-		Status:    int32(request.Data.Status),
 		UserID:    request.Data.UserId,
+		Status:    OrderPending,
 		CreatedAt: time.Now(),
 	}
 
 	err = qtx.CreateOrder(r.Context(), createOrderParam)
 	if err != nil {
 		app.serverErrorResponse(w, err)
+		return
 	}
 
 	for _, product := range request.Data.Products {
@@ -219,6 +225,74 @@ func (app *application) getOrderById(w http.ResponseWriter, r *http.Request) {
 		Data:          result,
 	}, nil)
 
+	if err != nil {
+		app.serverErrorResponse(w, err)
+	}
+}
+
+func (app *application) updateOrderHandler(w http.ResponseWriter, r *http.Request) {
+	orderId, err := app.readIDParam(r, "orderId")
+	if err != nil {
+		app.badRequestErrorResponse(w, "orderId must be provide!")
+		return
+	}
+
+	var request payload.UpdateOrderRequest
+	err = app.readJson(w, r, &request)
+	if err != nil {
+		app.badRequestErrorResponse(w, err.Error())
+		return
+	}
+
+	v := validator.New()
+	if payload.ValidateUpdateOrderRequest(v, request); !v.Valid() {
+		app.failedValidationResponse(w, v.Errors)
+		return
+	}
+
+	token := r.Header.Get("Authorization")
+	if len(token) == 0 {
+		app.badRequestErrorResponse(w, "Can not get token from header !")
+		return
+	}
+
+	userId, ok := cache.Store.Get(token)
+	if !ok {
+		app.badRequestErrorResponse(w, "Invalid token !")
+		return
+	}
+
+	getOrderParams := db.GetOrderByIdParams{
+		UserID: userId,
+		ID:     orderId.String(),
+	}
+
+	order, err := app.queries.GetOrderById(r.Context(), getOrderParams)
+	if err != nil {
+		app.notFoundErrorResponse(w, "Order does not exist!")
+		return
+	}
+
+	if order.UserID != userId {
+		app.unauthorizedErrorResponse(w, "Unauthorized user to access this order!")
+		return
+	}
+
+	updateOrderParams := db.UpdateOrderStatusParams{
+		Status: int32(request.Data.Status),
+		ID:     order.ID,
+	}
+
+	err = app.queries.UpdateOrderStatus(r.Context(), updateOrderParams)
+	if err != nil {
+		app.serverErrorResponse(w, err)
+		return
+	}
+
+	err = app.writeJson(w, http.StatusOK, payload.BaseResponse{
+		ResultCode:    SuccessCode,
+		ResultMessage: SuccessMessage,
+	}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, err)
 	}

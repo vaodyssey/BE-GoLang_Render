@@ -180,3 +180,17 @@ func (q *Queries) GetOrdersPaginated(ctx context.Context, arg GetOrdersPaginated
 	}
 	return items, nil
 }
+
+const updateOrderStatus = `-- name: UpdateOrderStatus :exec
+UPDATE orders set status = ? WHERE id = ?
+`
+
+type UpdateOrderStatusParams struct {
+	Status int32  `json:"status"`
+	ID     string `json:"id"`
+}
+
+func (q *Queries) UpdateOrderStatus(ctx context.Context, arg UpdateOrderStatusParams) error {
+	_, err := q.db.ExecContext(ctx, updateOrderStatus, arg.Status, arg.ID)
+	return err
+}
