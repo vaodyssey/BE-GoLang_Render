@@ -33,3 +33,6 @@ WHERE STRCMP(sqlc.arg(user_id),user_id) = 0 AND STRCMP(sqlc.arg(id),id) = 0;
 SELECT order_id, product_id, quantity
 FROM order_details
 WHERE order_id = ?;
+
+/* name: UpdateOrderStatus :exec */
+UPDATE orders set status = ? WHERE id = ?;
