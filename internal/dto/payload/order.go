@@ -15,7 +15,12 @@ type CreateOrderRequest struct {
 		} `json:"products"`
 		Amount float64 `json:"amount"`
 		UserId string  `json:"user_id"`
-		Status int     `json:"status"`
+	} `json:"data"`
+}
+
+type UpdateOrderRequest struct {
+	Data struct {
+		Status int `json:"status"`
 	} `json:"data"`
 }
 
@@ -31,11 +36,14 @@ func ValidateCreateOrderRequest(v *validator.Validator, request CreateOrderReque
 	v.Check(request.Data.Amount != 0, "amount", "can not be zero !")
 	v.Check(request.Data.UserId != "", "userId", "must be provided")
 	v.Check(validator.Matches(request.Data.UserId, validator.UuidRx), "userId", "must be uuid!")
-	v.Check(request.Data.Status >= 0 && request.Data.Status <= 2, "status", "unknown")
 	v.Check(len(request.Data.Products) > 0, "products", "must be provided")
 
 	for _, product := range request.Data.Products {
 		v.Check(validator.Matches(product.Id, validator.UuidRx), fmt.Sprintf("productId:%s", product.Id), "must be uuid!")
 		v.Check(product.Quantity > 0, "product quantity", "must larger than zero!")
 	}
+}
+
+func ValidateUpdateOrderRequest(v *validator.Validator, request UpdateOrderRequest) {
+	v.Check(request.Data.Status >= 0 && request.Data.Status <= 3, "status", "unknown status")
 }

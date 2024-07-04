@@ -49,9 +49,10 @@ func (app *application) routes() http.Handler {
 	routes.HandleFunc("GET /products", app.getProductsPaginatedHandler)
 
 	// Order routes
+	routes.HandleFunc("POST /orders", app.createOrderHandler)
+	routes.HandleFunc("PUT /orders/{orderId}", app.updateOrderHandler)
 	routes.HandleFunc("GET /orders", app.getOrdersPaginated)
 	routes.HandleFunc("GET /orders/{orderId}", app.getOrderById)
-	routes.HandleFunc("POST /orders", app.createOrderHandler)
 
 	// User routes
 	routes.HandleFunc("POST /register", app.registerUserHandler)
