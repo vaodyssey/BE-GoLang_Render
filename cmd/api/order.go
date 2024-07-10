@@ -106,6 +106,9 @@ func (app *application) createOrderHandler(w http.ResponseWriter, r *http.Reques
 	err = app.writeJson(w, http.StatusOK, payload.BaseResponse{
 		ResultCode:    SuccessCode,
 		ResultMessage: SuccessMessage,
+		Data: map[string]string{
+			"orderId": createOrderParam.ID,
+		},
 	}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, err)
