@@ -9,6 +9,7 @@ VALUES (?, ?, ?);
 /* name: GetOrdersPaginated :many */
 SELECT id, amount, status, user_id, created_at
 FROM orders
+WHERE user_id = sqlc.arg(user_id)
 ORDER BY
     CASE WHEN sqlc.arg(sort_by) = 'createdAt' AND sqlc.arg(sort_order) = 'ASC' THEN created_at END ,
     CASE WHEN sqlc.arg(sort_by) = 'createdAt' AND sqlc.arg(sort_order) = 'DESC' THEN created_at END DESC ,
