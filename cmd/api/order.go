@@ -144,6 +144,7 @@ func (app *application) getOrdersPaginated(w http.ResponseWriter, r *http.Reques
 		SortOrder: sortOrder,
 		Limit:     int32(pageSize),
 		Offset:    int32(pageSize * (pageNumber - 1)),
+		UserID:    userId,
 	}
 
 	orders, err := app.queries.GetOrdersPaginated(r.Context(), params)

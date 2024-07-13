@@ -119,6 +119,7 @@ func (q *Queries) GetOrderTotalCount(ctx context.Context, userID string) (int64,
 const getOrdersPaginated = `-- name: GetOrdersPaginated :many
 SELECT id, amount, status, user_id, created_at
 FROM orders
+WHERE user_id = ?
 ORDER BY
     CASE WHEN ? = 'createdAt' AND ? = 'ASC' THEN created_at END ,
     CASE WHEN ? = 'createdAt' AND ? = 'DESC' THEN created_at END DESC ,
@@ -131,6 +132,7 @@ OFFSET ?
 `
 
 type GetOrdersPaginatedParams struct {
+	UserID    string      `json:"userId"`
 	SortBy    interface{} `json:"sortBy"`
 	SortOrder interface{} `json:"sortOrder"`
 	Limit     int32       `json:"limit"`
@@ -139,6 +141,7 @@ type GetOrdersPaginatedParams struct {
 
 func (q *Queries) GetOrdersPaginated(ctx context.Context, arg GetOrdersPaginatedParams) ([]Order, error) {
 	rows, err := q.db.QueryContext(ctx, getOrdersPaginated,
+		arg.UserID,
 		arg.SortBy,
 		arg.SortOrder,
 		arg.SortBy,
